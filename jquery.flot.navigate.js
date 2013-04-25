@@ -128,33 +128,106 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
     };
 
     function init(plot) {
-        function onZoomClick(e, zoomOut,zoomY,zoomY2,zoomX) {
-			zoomY = (typeof zoomY === 'undefined')?false:zoomY
-			zoomX = (typeof zoomX === 'undefined')?false:zoomX
-			zoomY2 =(typeof zoomY2 === 'undefined')?false:zoomY2
-
+        function onZoomClick(e, zoomOut) {
+				
             var c = plot.offset();
             c.left = e.pageX - c.left;
             c.top = e.pageY - c.top;
             if (zoomOut)
-                plot.zoomOut({ center: c, zoomY: zoomY, 
-							   zoomY2: zoomY2, zoomX: zoomX });
+                plot.zoomOut({ center: c });
             else
-                plot.zoom({ center: c, zoomY: zoomY, 
-							zoomY2: zoomY2, zoomX: zoomX });
+                plot.zoom({ center: c });
         }
+        var X_AXIS=0; var Y1_AXIS=1; var Y2_AXIS=2; var UNSPECIFIED_AXIS=-1;
+        var ZOOM_BOUND=0.25;
+				var zoomableAxis = -1;
+				
+				function onMouseMove(plot,e){
+				    var offset = plot.offset();
+ 				    plot.triggerRedrawOverlay();
+ 				    var x = (e.pageX -offset.left)/plot.width();
+ 				    var y = (e.pageY - offset.top)/plot.height(); 
+ 				    x = Math.max(0,Math.min(1,x));
+ 				    y = Math.max(0,Math.min(1,y));
+ 				    y1_val=x;
+ 				    y2_val=1-x;
+ 				    x_val=1-y;
+ 				    //check for x axis zoomability
+ 				    if(x_val<ZOOM_BOUND && x_val<y1_val && x_val<y2_val){
+ 				    	zoomableAxis = X_AXIS;
+ 				    } else if(y1_val<ZOOM_BOUND && y1_val<x_val){
+ 				    	zoomableAxis = Y1_AXIS;
+ 				    } else if(y2_val<ZOOM_BOUND && y2_val<x_val){
+ 				    	zoomableAxis = Y2_AXIS;
+ 				    } else {
+ 				    	zoomableAxis = UNSPECIFIED_AXIS;
+ 				    }
+ 				    
+ 				    //console.log("x:"+x_val+ " y1:"+y1_val+ " y2:"+ y2_val);
 
+				  //  console.log(e);
+            //crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
+            //crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
+         
+				}
+				function onMouseOut(plot,e){
+					zoomableAxis=UNSPECIFIED_AXIS;
+					plot.triggerRedrawOverlay();
+				}
+				function highlightZoomAxis(plot,ctx){
+					var plotOffset = plot.getPlotOffset();
+					//drawZoomRegions(plot,ctx);
+					ctx.save();
+					ctx.translate(plotOffset.left,plotOffset.top); //so our coordinates are 0,0
+					ctx.strokeStyle="rgba(232, 207, 172, 0.30)";
+					ctx.lineWidth=10;
+					ctx.beginPath();
+					switch(zoomableAxis){
+						case Y1_AXIS:
+							ctx.moveTo(0,0);
+							ctx.lineTo(0,plot.height());
+							break;
+						case Y2_AXIS:
+							ctx.moveTo(plot.width(),plot.height());
+							ctx.lineTo(plot.width(),0)
+							break;
+						case X_AXIS:
+							ctx.moveTo(0,plot.height())
+							ctx.lineTo(plot.width(),plot.height());
+							break;	
+						default: //no zoomable axis
+							break;
+					}
+					ctx.stroke();
+					ctx.restore();
+				}
+				function drawZoomRegions(plot,ctx){
+					var plotOffset = plot.getPlotOffset();
+					ctx.save();
+					ctx.translate(plotOffset.left,plotOffset.top); //so our coordinates are 0,0
+					ctx.strokeStyle="rgba(0, 170, 0, 0.80)";
+					ctx.lineWidth=2;
+					ctx.beginPath();
+					ctx.moveTo(ZOOM_BOUND*plot.width(),0);
+					ctx.lineTo(ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
+					ctx.lineTo(0,plot.height());
+					ctx.moveTo(ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
+					ctx.lineTo(plot.width()-ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
+					ctx.lineTo(plot.width(),plot.height());
+					ctx.moveTo(plot.width()-ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
+					ctx.lineTo(plot.width()-ZOOM_BOUND*plot.width(),0)
+					ctx.stroke();
+					ctx.restore();
+				}
         function onMouseWheel(e, delta) {
 			//listen for modifier keys
 			//ALT= zoom y1
 			//SHIFT= zoom y2
 			//ALT+SHIFT= zoom x
-            onZoomClick(e, delta < 0, 
-						e.shiftKey & !e.altKey,
-						e.altKey & !e.shiftKey,
-						e.altKey & e.shiftKey);
+				
+          onZoomClick(e, delta < 0);
 //			e.stopPropagation();
-            return false;
+          return false;
         }
         
         var prevCursor = 'default', prevPageX = 0, prevPageY = 0,
@@ -178,9 +251,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             panTimeout = setTimeout(function () {
                 plot.pan({ left: prevPageX - e.pageX,
-                           top: prevPageY - e.pageY,
-						   lockY2: e.shiftKey,
-						   lockY: e.altKey,
+                           top: prevPageY - e.pageY
 						 });
                 prevPageX = e.pageX;
                 prevPageY = e.pageY;
@@ -197,9 +268,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     
             plot.getPlaceholder().css('cursor', prevCursor);
             plot.pan({ left: prevPageX - e.pageX,
-                       top: prevPageY - e.pageY,
-					   lockY2: e.shiftKey,
-					   lockY: e.altKey,
+                       top: prevPageY - e.pageY
 					 });
         }
         
@@ -208,6 +277,12 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (o.zoom.interactive) {
                 eventHolder[o.zoom.trigger](onZoomClick);
                 eventHolder.mousewheel(onMouseWheel);
+                eventHolder.mousemove(function(e){
+                	onMouseMove(plot,e);
+                })
+                eventHolder.mouseout(function(e){
+                	onMouseOut(plot,e);
+                })
             }
 
             if (o.pan.interactive) {
@@ -216,7 +291,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 eventHolder.bind("dragend", onDragEnd);
             }
         }
-
+				plot.hooks.drawOverlay.push(highlightZoomAxis)
         plot.zoomOut = function (args) {
             if (!args)
                 args = {};
@@ -261,13 +336,13 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 if (zr === false) // no zooming on this axis
                     return;
                 //zoom Y axis only (if requested)
-				if(!(axis.direction=="y"&&axis.n==1) && args.zoomY)
+				if(!(axis.direction=="y"&&axis.n==1) && (zoomableAxis==Y1_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
 					return;
 				//zoom Y2 axis only (if requested)
-				if(!(axis.direction=="y"&&axis.n==2) && args.zoomY2)
+				if(!(axis.direction=="y"&&axis.n==2) && (zoomableAxis==Y2_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
 					return;
 				//zoom X axis zooming if requested
-				if(axis.direction!="x" && args.zoomX)
+				if(axis.direction!="x" && (zoomableAxis==X_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
 					return;
                 min = axis.c2p(min);
                 max = axis.c2p(max);
@@ -325,12 +400,12 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 var pr = opts.panRange;
                 if (pr === false) // no panning on this axis
                     return;
-                //check if modifier key has locked this axis
-				if((axis.direction=="y"&&axis.n==1) && args.lockY)
-					return;
-                //check if modifier key has locked this axis
-				if((axis.direction=="y"&&axis.n==2) && args.lockY2)
-					return;
+                //check if the cursor position has locked this axis
+								if((axis.direction=="y"&&axis.n==1) && zoomableAxis==Y2_AXIS)
+									return;
+				                //check if the cursor position has locked this axis
+								if((axis.direction=="y"&&axis.n==2) && zoomableAxis==Y1_AXIS)
+									return;
 				//disable pan limit checking!
 /*	
 	
