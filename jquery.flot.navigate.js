@@ -179,7 +179,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 					//drawZoomRegions(plot,ctx);
 					ctx.save();
 					ctx.translate(plotOffset.left,plotOffset.top); //so our coordinates are 0,0
-					ctx.strokeStyle="rgba(232, 207, 172, 0.30)";
+					ctx.strokeStyle="rgba(255,255,0,0.50)";//"rgba(232, 207, 172, 0.30)";
 					ctx.lineWidth=10;
 					ctx.beginPath();
 					switch(zoomableAxis){
