@@ -2365,13 +2365,15 @@ Licensed under the MIT license.
 	                $(options.legend.container).html(table);
 	            else {
 	                var pos = "",
-	                    p = "", // options.legend.position, (override this option)
+	                    p = options.legend.position, //(override this option)
 	                    m = options.legend.margin;
 	                //force legend position depending on current axis
-	                if(j==0)
-	                	p = 'nw'
-	                if(j==1)
-	                	p = 'ne'
+	                if(options.legend.split){
+		                if(j==0)
+		                	p = 'nw'
+		                if(j==1)
+		                	p = 'ne'
+		               }
 	                	
 	                if (m[0] == null)
 	                    m = [m, m];
