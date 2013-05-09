@@ -294,30 +294,40 @@ The plugin allso adds the following methods to the plot object:
 
         plot.hooks.drawOverlay.push(function (plot, ctx) {
             // draw selection
-            if (selection.show && selectionIsSane()) {
-                var plotOffset = plot.getPlotOffset();
-                var o = plot.getOptions();
+            if(!selection.show)
+            	return;
+          	var x = Math.min(selection.first.x, selection.second.x) + 0.5,
+                y = Math.min(selection.first.y, selection.second.y) + 0.5,
+                w = Math.abs(selection.second.x - selection.first.x) - 1,
+                h = Math.abs(selection.second.y - selection.first.y) - 1;
+            //make sure we are in bounds
+            x = Math.max(x,0);
+            x = Math.min(x,plot.width())
+            w = Math.max(w,0);
+            w = Math.min(w,(plot.width()-x));
+            
+            var plotOffset = plot.getPlotOffset();
+            var o = plot.getOptions();
 
-                ctx.save();
-                ctx.translate(plotOffset.left, plotOffset.top);
-
-                var c = $.color.parse(o.selection.color);
-
-                ctx.strokeStyle = c.scale('a', 0.8).toString();
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
+            var c = $.color.parse(o.selection.color);
+            ctx.strokeStyle = c.scale('a', 0.8).toString();    
+            if (selectionIsSane()) {
                 ctx.lineWidth = 1;
                 ctx.lineJoin = "round";
                 ctx.fillStyle = c.scale('a', 0.4).toString();
-
-                var x = Math.min(selection.first.x, selection.second.x) + 0.5,
-                    y = Math.min(selection.first.y, selection.second.y) + 0.5,
-                    w = Math.abs(selection.second.x - selection.first.x) - 1,
-                    h = Math.abs(selection.second.y - selection.first.y) - 1;
-
                 ctx.fillRect(x, y, w, h);
                 ctx.strokeRect(x, y, w, h);
-
-                ctx.restore();
-            }
+           }
+           else{
+           		ctx.lineWidth=2;
+           		ctx.moveTo(x,0);
+           		ctx.lineTo(x,plot.height());
+           		ctx.stroke();	
+           }
+           
+           ctx.restore();
         });
         
         plot.hooks.shutdown.push(function (plot, eventHolder) {
