@@ -128,6 +128,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
     };
 
     function init(plot) {
+    
         function onZoomClick(e, zoomOut) {
 				
             var c = plot.offset();
@@ -153,6 +154,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
  				    y2_val=1-x;
  				    x_val=1-y;
  				    //check for x axis zoomability
+ 				    var oldAxis=zoomableAxis;
  				    if(x_val<ZOOM_BOUND && x_val<y1_val && x_val<y2_val){
  				    	zoomableAxis = X_AXIS;
  				    } else if(y1_val<ZOOM_BOUND && y1_val<x_val){
@@ -162,7 +164,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
  				    } else {
  				    	zoomableAxis = UNSPECIFIED_AXIS;
  				    }
- 				    
+ 				    if(oldAxis!=zoomableAxis)
+ 				    	plot.getPlaceholder().trigger("setZoomableAxis", [ zoomableAxis ]);
  				    //console.log("x:"+x_val+ " y1:"+y1_val+ " y2:"+ y2_val);
 
 				  //  console.log(e);
@@ -171,7 +174,13 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
          
 				}
 				function onMouseOut(plot,e){
+					//check to see if the mouse actually left the plot or its just in the resize button
+					if(e.pageX>=plot.offset().left && e.pageX<=(plot.offset().left+plot.width()))
+							if(e.pageY>=plot.offset().top && e.pageY<=(plot.offset().top+plot.height()))
+								return;
+					
 					zoomableAxis=UNSPECIFIED_AXIS;
+					plot.getPlaceholder().trigger("setZoomableAxis", [ zoomableAxis ]);
 					plot.triggerRedrawOverlay();
 				}
 				function highlightZoomAxis(plot,ctx){
