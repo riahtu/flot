@@ -141,7 +141,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
         var X_AXIS=0; var Y1_AXIS=1; var Y2_AXIS=2; var UNSPECIFIED_AXIS=-1;
         var ZOOM_BOUND=0.25;
+        var RESIZE_BOUND=0.05;
 				var zoomableAxis = -1;
+				var resizableAxis = -1;
 				
 				function onMouseMove(plot,e){
 				    var offset = plot.offset();
@@ -153,19 +155,30 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
  				    y1_val=x;
  				    y2_val=1-x;
  				    x_val=1-y;
- 				    //check for x axis zoomability
- 				    var oldAxis=zoomableAxis;
+ 				    //check for axis zoomability
+ 				    var oldZoomable=zoomableAxis;
+ 				    var oldResizable = resizableAxis;
+ 				    resizableAxis=UNSPECIFIED_AXIS;
  				    if(x_val<ZOOM_BOUND && x_val<y1_val && x_val<y2_val){
  				    	zoomableAxis = X_AXIS;
+ 				    	if(x_val<RESIZE_BOUND){
+ 				    		resizableAxis=X_AXIS;}
  				    } else if(y1_val<ZOOM_BOUND && y1_val<x_val){
  				    	zoomableAxis = Y1_AXIS;
+ 				    	if(y1_val<RESIZE_BOUND){
+ 				    		resizableAxis=Y1_AXIS;}
  				    } else if(y2_val<ZOOM_BOUND && y2_val<x_val){
  				    	zoomableAxis = Y2_AXIS;
+ 				    	if(y2_val<RESIZE_BOUND){
+ 				    		resizableAxis=Y2_AXIS;}
  				    } else {
  				    	zoomableAxis = UNSPECIFIED_AXIS;
  				    }
- 				    if(oldAxis!=zoomableAxis)
- 				    	plot.getPlaceholder().trigger("setZoomableAxis", [ zoomableAxis ]);
+						//check for axis resiablity
+						
+						if(resizableAxis != oldResizable)			    
+		    	 		plot.getPlaceholder().trigger("setResizableAxis", [ resizableAxis ]);
+
  				    //console.log("x:"+x_val+ " y1:"+y1_val+ " y2:"+ y2_val);
 
 				  //  console.log(e);
@@ -180,7 +193,8 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 								return;
 					
 					zoomableAxis=UNSPECIFIED_AXIS;
-					plot.getPlaceholder().trigger("setZoomableAxis", [ zoomableAxis ]);
+					resizableAxis=UNSPECIFIED_AXIS;
+					plot.getPlaceholder().trigger("setResizableAxis", [ resizableAxis ]);
 					plot.triggerRedrawOverlay();
 				}
 				function highlightZoomAxis(plot,ctx){
@@ -217,14 +231,14 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 					ctx.strokeStyle="rgba(0, 170, 0, 0.80)";
 					ctx.lineWidth=2;
 					ctx.beginPath();
-					ctx.moveTo(ZOOM_BOUND*plot.width(),0);
-					ctx.lineTo(ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
+					ctx.moveTo(RESIZE_BOUND*plot.width(),0);
+					ctx.lineTo(RESIZE_BOUND*plot.width(),plot.height()-RESIZE_BOUND*plot.height());
 					ctx.lineTo(0,plot.height());
-					ctx.moveTo(ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
-					ctx.lineTo(plot.width()-ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
+					ctx.moveTo(RESIZE_BOUND*plot.width(),plot.height()-RESIZE_BOUND*plot.height());
+					ctx.lineTo(plot.width()-RESIZE_BOUND*plot.width(),plot.height()-RESIZE_BOUND*plot.height());
 					ctx.lineTo(plot.width(),plot.height());
-					ctx.moveTo(plot.width()-ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
-					ctx.lineTo(plot.width()-ZOOM_BOUND*plot.width(),0)
+					ctx.moveTo(plot.width()-RESIZE_BOUND*plot.width(),plot.height()-RESIZE_BOUND*plot.height());
+					ctx.lineTo(plot.width()-RESIZE_BOUND*plot.width(),0)
 					ctx.stroke();
 					ctx.restore();
 				}
