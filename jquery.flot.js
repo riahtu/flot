@@ -185,6 +185,7 @@ Licensed under the MIT license.
             o.top += plotOffset.top;
             return o;
         };
+        plot.exportImage = function(){ return canvas.toDataURL();}
         plot.getData = function () { return series; };
         plot.getAxes = function () {
             var res = {}, i;
