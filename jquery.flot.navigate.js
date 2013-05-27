@@ -187,9 +187,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
          
 				}
 				function onMouseOut(plot,e){
-					//check to see if the mouse actually left the plot or its just in the resize button
-					if(e.pageX>=plot.offset().left && e.pageX<=(plot.offset().left+plot.width()))
-							if(e.pageY>=plot.offset().top && e.pageY<=(plot.offset().top+plot.height()))
+					//check to see if the mouse actually left the plot or its just in the resize button 
+					//(add 5 padding to account for resize button widths)
+					if(e.pageX>=(plot.offset().left - 5) && e.pageX<=(plot.offset().left+plot.width()+10))
+							if(e.pageY>=plot.offset().top && e.pageY<=(plot.offset().top+plot.height()+15))
 								return;
 					
 					zoomableAxis=UNSPECIFIED_AXIS;
