@@ -2294,6 +2294,9 @@ Licensed under the MIT license.
                 if (s.label) {
                     label = lf ? lf(s.label, s) : s.label;
                     if (label) {
+                    		if(options.yaxes[s.yaxis.n-1]['axisLabel'])
+                    			label = label+"  <span class='muted'>("+plot.getOptions()['yaxes'][s.yaxis.n-1]['axisLabel']+")</span>"
+                    		
                     		if(s.yaxis.n==1)
 	                        y1_entries.push({
 	                            label: label,
