@@ -242,7 +242,14 @@ The plugin allso adds the following methods to the plot object:
             return { from: from, to: to, axis: axis };
         }
         
+        function clearSelection(){
+      			selection.show = false
+      			plot.triggerRedrawOverlay();
+      			return;
+        }
+        
         function setSelection(ranges, preventEvent) {
+        		
             var axis, range, o = plot.getOptions();
 
             if (o.selection.mode == "y") {
@@ -282,7 +289,8 @@ The plugin allso adds the following methods to the plot object:
         plot.clearSelection = clearSelection;
         plot.setSelection = setSelection;
         plot.getSelection = getSelection;
-
+				plot.clearSelection = clearSelection;
+				
         plot.hooks.bindEvents.push(function(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.selection.mode != null) {
