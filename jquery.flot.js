@@ -2294,9 +2294,11 @@ Licensed under the MIT license.
                 if (s.label) {
                     label = lf ? lf(s.label, s) : s.label;
                     if (label) {
+                    		//axisLabel is the units for this axis
+                    		//if units are specified, display them in light gray in parenthesis
                     		if(options.yaxes[s.yaxis.n-1]['axisLabel'])
                     			label = label+"  <span class='muted'>("+plot.getOptions()['yaxes'][s.yaxis.n-1]['axisLabel']+")</span>"
-                    		
+                    		//if units are not specified, just insert the label in the legend
                     		if(s.yaxis.n==1)
 	                        y1_entries.push({
 	                            label: label,
