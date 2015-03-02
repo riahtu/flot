@@ -69,7 +69,8 @@ The plugin allso adds the following methods to the plot object:
         var selection = {
                 first: { x: -1, y: -1}, second: { x: -1, y: -1},
                 show: false,
-                active: false
+                active: false,
+				enabled: true	//**custom addition**
             };
 
         // FIXME: The drag handling implemented here should be
@@ -90,6 +91,10 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function onMouseDown(e) {
+			//check if selection is currently enabled
+			if(!selection.enabled)
+				return;
+			
             if (e.which != 1)  // only accept left-click
                 return;
             
@@ -156,7 +161,15 @@ The plugin allso adds the following methods to the plot object:
             });
             return r;
         }
-
+		///****custom addition to enable and disable the plugin***
+		function enableSelection(){
+			selection.enabled=true;
+		}
+		function disableSelection(){
+			selection.enabled=false;
+		}
+		//***end custom addition***
+		
         function triggerSelectedEvent() {
             var r = getSelection();
 
@@ -289,8 +302,11 @@ The plugin allso adds the following methods to the plot object:
         plot.clearSelection = clearSelection;
         plot.setSelection = setSelection;
         plot.getSelection = getSelection;
-				plot.clearSelection = clearSelection;
-				
+		plot.clearSelection = clearSelection;
+		//***custom addition***
+		plot.enableSelection = enableSelection;
+		plot.disableSelection = disableSelection;
+		
         plot.hooks.bindEvents.push(function(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.selection.mode != null) {
