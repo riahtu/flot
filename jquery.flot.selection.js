@@ -70,7 +70,8 @@ The plugin allso adds the following methods to the plot object:
                 first: { x: -1, y: -1}, second: { x: -1, y: -1},
                 show: false,
                 active: false,
-				enabled: true	//**custom addition**
+				zoomLocked: false,	//toggle between fixed and drag zoom modes
+				zoomRange: 0, 	    //the fixed zoom range (when zoom is locked)
             };
 
         // FIXME: The drag handling implemented here should be
@@ -83,17 +84,19 @@ The plugin allso adds the following methods to the plot object:
         var mouseUpHandler = null;
         
         function onMouseMove(e) {
-            if (selection.active) {
-                updateSelection(e);
-                
+			
+            if (!selection.zoomLocked && selection.active) {
+                updateSelection(e);          
                 plot.getPlaceholder().trigger("plotselecting", [ getSelection() ]);
             }
+			if(selection.zoomLocked && selection.active){
+				//console.log("setting fixed pos");
+				setFixedSelectionPos(e);
+			}
         }
 
         function onMouseDown(e) {
-			//check if selection is currently enabled
-			if(!selection.enabled)
-				return;
+			
 			
             if (e.which != 1)  // only accept left-click
                 return;
@@ -111,10 +114,11 @@ The plugin allso adds the following methods to the plot object:
                 document.ondrag = function () { return false; };
             }
 
-            setSelectionPos(selection.first, e);
-
-            selection.active = true;
-
+           
+			//if dragging zoom is enabled set the first position
+			if(!selection.zoomLocked)
+				setSelectionPos(selection.first, e);
+			 selection.active = true;
             // this is a bit silly, but we have to use a closure to be
             // able to whack the same handler again
             mouseUpHandler = function (e) { onMouseUp(e); };
@@ -133,9 +137,11 @@ The plugin allso adds the following methods to the plot object:
 
             // no more dragging
             selection.active = false;
-            updateSelection(e);
+			//if the zoom is draggable, update the endpoint
+			if(!selection.zoomLocked)
+            	updateSelection(e);
 
-            if (selectionIsSane())
+            if (selectionIsSane() || selection.zoomLocked) //if zoom is locked, selection is always sane
                 triggerSelectedEvent();
             else {
                 // this counts as a clear
@@ -145,9 +151,12 @@ The plugin allso adds the following methods to the plot object:
 
             return false;
         }
-
-        function getSelection() {
-            if (!selectionIsSane())
+		//force==true -> bypass IsSane check
+        function getSelection(force) {
+			if(typeof force === "undefined")
+				force = false;
+			
+            if (!selectionIsSane()&&!force)
                 return null;
             
             if (!selection.show) return null;
@@ -161,17 +170,27 @@ The plugin allso adds the following methods to the plot object:
             });
             return r;
         }
-		///****custom addition to enable and disable the plugin***
-		function enableSelection(){
-			selection.enabled=true;
-		}
-		function disableSelection(){
-			selection.enabled=false;
+		///****custom addition****
+		//If the zoom is locked clicking and dragging moves the 
+		//window rather than adjusting it
+		function lockZoom(isLocked){
+			var range, axis;
+			range = getSelection(true); //force selection
+			if(range==null)
+				return;
+			selection.zoomLocked=isLocked;
+			axis = plot.getAxes().xaxis;
+			selection.zoomRange = axis.p2c(range.xaxis.to)-axis.p2c(range.xaxis.from);
+			//console.log("locking zoom to "+selection.zoomRange);
 		}
 		//***end custom addition***
 		
         function triggerSelectedEvent() {
-            var r = getSelection();
+            var r;
+			if(selection.zoomLocked)
+				r = getSelection(true); //force selection- no isSane check
+			else
+				r = getSelection();
 
             plot.getPlaceholder().trigger("plotselected", [ r ]);
 
@@ -197,7 +216,23 @@ The plugin allso adds the following methods to the plot object:
             if (o.selection.mode == "x")
                 pos.y = pos == selection.first ? 0 : plot.height();
         }
-
+		function setFixedSelectionPos(e){
+			//update both the first and second selection positions based off e 
+			//and the saved zoomRange parameter
+            var offset = plot.getPlaceholder().offset();
+            var plotOffset = plot.getPlotOffset();
+			var click_pos ={x:0,y:0};
+            click_pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plot.width());
+			selection.first.x = clamp(0,click_pos.x-selection.zoomRange/2,plot.width());
+			selection.second.x = clamp(0,click_pos.x+selection.zoomRange/2,plot.width());
+			//console.log(selection.first);
+			//console.log(selection.second);
+            //click_pos.y = pos == selection.first ? 0 : plot.height();
+            //if (selectionIsSane()) {
+                selection.show = true;
+                plot.triggerRedrawOverlay();
+				//}
+		}
         function updateSelection(pos) {
             if (pos.pageX == null)
                 return;
@@ -289,6 +324,9 @@ The plugin allso adds the following methods to the plot object:
 
             selection.show = true;
             plot.triggerRedrawOverlay();
+			//call lock zoom with current value of lock
+			//just updates the zoomrange, does not change zoom behavior
+			lockZoom(selection.zoomLocked);
             if (!preventEvent && selectionIsSane())
                 triggerSelectedEvent();
         }
@@ -304,8 +342,7 @@ The plugin allso adds the following methods to the plot object:
         plot.getSelection = getSelection;
 		plot.clearSelection = clearSelection;
 		//***custom addition***
-		plot.enableSelection = enableSelection;
-		plot.disableSelection = disableSelection;
+		plot.lockZoom = lockZoom;
 		
         plot.hooks.bindEvents.push(function(plot, eventHolder) {
             var o = plot.getOptions();
