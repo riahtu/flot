@@ -146,6 +146,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 				var resizableAxis = -1;
 				
 				function onMouseMove(plot,e){
+          //if panning isn't enabled, just return
+          if(plot.getOptions()['pan']['interactive']==false)
+            return;
+          
 				    var offset = plot.offset();
  				    plot.triggerRedrawOverlay();
  				    var x = (e.pageX -offset.left)/plot.width();
@@ -187,6 +191,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
          
 				}
 				function onMouseOut(plot,e){
+          //if panning isn't enabled, just return
+          if(plot.getOptions()['pan']['interactive']==false)
+            return;
+          
 					//check to see if the mouse actually left the plot or its just in the resize button 
 					//(add 5 padding to account for resize button widths)
 					if(e.pageX>=(plot.offset().left - 5) && e.pageX<=(plot.offset().left+plot.width()+10))
@@ -244,11 +252,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 					ctx.restore();
 				}
         function onMouseWheel(e, delta) {
-			//listen for modifier keys
-			//ALT= zoom y1
-			//SHIFT= zoom y2
-			//ALT+SHIFT= zoom x
-				
+          //if zooming isn't enabled, just return
+          if(plot.getOptions()['zoom']['interactive']==false)
+            return;
+          
           onZoomClick(e, delta < 0);
 //			e.stopPropagation();
           return false;
@@ -258,6 +265,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             panTimeout = null;
 
         function onDragStart(e) {
+          //if panning isn't enabled, just return
+          if(plot.getOptions()['pan']['interactive']==false)
+            return;
+          
             if (e.which != 1)  // only accept left-click
                 return false;
             var c = plot.getPlaceholder().css('cursor');
@@ -269,6 +280,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
         
         function onDrag(e) {
+          //if panning isn't enabled, just return
+          if(plot.getOptions()['pan']['interactive']==false)
+            return;
+          
             var frameRate = plot.getOptions().pan.frameRate;
             if (panTimeout || !frameRate)
                 return;
@@ -285,6 +300,10 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         }
 
         function onDragEnd(e) {
+          //if panning isn't enabled, just return
+          if(plot.getOptions()['pan']['interactive']==false)
+            return;
+          
             if (panTimeout) {
                 clearTimeout(panTimeout);
                 panTimeout = null;
