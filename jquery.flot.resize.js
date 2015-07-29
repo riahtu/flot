@@ -36,8 +36,8 @@ can just fix the size of their placeholders.
 
             plot.resize();
             var showY2=	plot.getAxes()['y2axis']['show']
-			plot.setupGrid();
-			plot.getAxes()['y2axis']['show']=showY2
+      			plot.setupGrid();
+      			plot.getAxes()['y2axis']['show']=showY2
             plot.draw();
         }
         

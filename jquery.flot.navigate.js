@@ -172,9 +172,15 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
  				    	if(y1_val<RESIZE_BOUND){
  				    		resizableAxis=Y1_AXIS;}
  				    } else if(y2_val<ZOOM_BOUND && y2_val<x_val){
- 				    	zoomableAxis = Y2_AXIS;
- 				    	if(y2_val<RESIZE_BOUND){
- 				    		resizableAxis=Y2_AXIS;}
+              //check if this plot has a y2 axis
+              if(plot.getAxes()['y2axis']['show']){
+ 				    	  zoomableAxis = Y2_AXIS;
+   				    	if(y2_val<RESIZE_BOUND){
+   				    		resizableAxis=Y2_AXIS;
+                }
+              } else {
+                zoomableAxis = UNSPECIFIED_AXIS; //no y2 axis
+              }
  				    } else {
  				    	zoomableAxis = UNSPECIFIED_AXIS;
  				    }
@@ -240,14 +246,14 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 					ctx.strokeStyle="rgba(0, 170, 0, 0.80)";
 					ctx.lineWidth=2;
 					ctx.beginPath();
-					ctx.moveTo(RESIZE_BOUND*plot.width(),0);
-					ctx.lineTo(RESIZE_BOUND*plot.width(),plot.height()-RESIZE_BOUND*plot.height());
+					ctx.moveTo(ZOOM_BOUND*plot.width(),0);
+					ctx.lineTo(ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
 					ctx.lineTo(0,plot.height());
-					ctx.moveTo(RESIZE_BOUND*plot.width(),plot.height()-RESIZE_BOUND*plot.height());
-					ctx.lineTo(plot.width()-RESIZE_BOUND*plot.width(),plot.height()-RESIZE_BOUND*plot.height());
+					ctx.moveTo(ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
+					ctx.lineTo(plot.width()-ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
 					ctx.lineTo(plot.width(),plot.height());
-					ctx.moveTo(plot.width()-RESIZE_BOUND*plot.width(),plot.height()-RESIZE_BOUND*plot.height());
-					ctx.lineTo(plot.width()-RESIZE_BOUND*plot.width(),0)
+					ctx.moveTo(plot.width()-ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
+					ctx.lineTo(plot.width()-ZOOM_BOUND*plot.width(),0)
 					ctx.stroke();
 					ctx.restore();
 				}
@@ -415,7 +421,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
             var showY2=	plot.getAxes()['y2axis']['show']
             plot.setupGrid();
-			plot.getAxes()['y2axis']['show']=showY2
+			      plot.getAxes()['y2axis']['show']=showY2
             plot.draw();
             
             if (!args.preventEvent)
