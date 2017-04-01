@@ -136,6 +136,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             var c = plot.offset();
             c.left = e.pageX - c.left;
             c.top = e.pageY - c.top;
+            console.log(c,e)
             if (zoomOut)
                 plot.zoomOut({ center: c });
             else
@@ -418,7 +419,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                      (zr[1] != null && range > zr[1] && amount <1)))
                     return;
 */            
-
+                console.log(args.center, plot.offset());
                 opts.min = min;
                 opts.max = max;
             });
