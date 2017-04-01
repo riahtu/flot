@@ -7,27 +7,14 @@ The plugin supports these options:
 
 selection: {
 	mode: null or "x" or "y" or "xy",
-	color: color,
-	shape: "round" or "miter" or "bevel",
-	minSize: number of pixels
+	color: color
 }
 
 Selection support is enabled by setting the mode to one of "x", "y" or "xy".
 In "x" mode, the user will only be able to specify the x range, similarly for
 "y" mode. For "xy", the selection becomes a rectangle where both ranges can be
 specified. "color" is color of the selection (if you need to change the color
-later on, you can get to it with plot.getOptions().selection.color). "shape"
-is the shape of the corners of the selection.
-
-"minSize" is the minimum size a selection can be in pixels. This value can
-be customized to determine the smallest size a selection can be and still
-have the selection rectangle be displayed. When customizing this value, the
-fact that it refers to pixels, not axis units must be taken into account.
-Thus, for example, if there is a bar graph in time mode with BarWidth set to 1
-minute, setting "minSize" to 1 will not make the minimum selection size 1
-minute, but rather 1 pixel. Note also that setting "minSize" to 0 will prevent
-"plotunselected" events from being fired when the user clicks the mouse without
-dragging.
+later on, you can get to it with plot.getOptions().selection.color).
 
 When selection support is enabled, a "plotselected" event will be emitted on
 the DOM element you passed into the plot function. The event handler gets a
@@ -45,8 +32,7 @@ parameters as the "plotselected" event, in case you want to know what's
 happening while it's happening,
 
 A "plotunselected" event with no arguments is emitted when the user clicks the
-mouse to remove the selection. As stated above, setting "minSize" to 0 will
-destroy this behavior.
+mouse to remove the selection.
 
 The plugin allso adds the following methods to the plot object:
 
@@ -83,7 +69,9 @@ The plugin allso adds the following methods to the plot object:
         var selection = {
                 first: { x: -1, y: -1}, second: { x: -1, y: -1},
                 show: false,
-                active: false
+                active: false,
+				zoomLocked: false,	//toggle between fixed and drag zoom modes
+				zoomRange: 0, 	    //the fixed zoom range (when zoom is locked)
             };
 
         // FIXME: The drag handling implemented here should be
@@ -96,14 +84,20 @@ The plugin allso adds the following methods to the plot object:
         var mouseUpHandler = null;
         
         function onMouseMove(e) {
-            if (selection.active) {
-                updateSelection(e);
-                
+			
+            if (!selection.zoomLocked && selection.active) {
+                updateSelection(e);          
                 plot.getPlaceholder().trigger("plotselecting", [ getSelection() ]);
             }
+			if(selection.zoomLocked && selection.active){
+				//console.log("setting fixed pos");
+				setFixedSelectionPos(e);
+			}
         }
 
         function onMouseDown(e) {
+			
+			
             if (e.which != 1)  // only accept left-click
                 return;
             
@@ -120,10 +114,11 @@ The plugin allso adds the following methods to the plot object:
                 document.ondrag = function () { return false; };
             }
 
-            setSelectionPos(selection.first, e);
-
-            selection.active = true;
-
+           
+			//if dragging zoom is enabled set the first position
+			if(!selection.zoomLocked)
+				setSelectionPos(selection.first, e);
+			 selection.active = true;
             // this is a bit silly, but we have to use a closure to be
             // able to whack the same handler again
             mouseUpHandler = function (e) { onMouseUp(e); };
@@ -142,9 +137,11 @@ The plugin allso adds the following methods to the plot object:
 
             // no more dragging
             selection.active = false;
-            updateSelection(e);
+			//if the zoom is draggable, update the endpoint
+			if(!selection.zoomLocked)
+            	updateSelection(e);
 
-            if (selectionIsSane())
+            if (selectionIsSane() || selection.zoomLocked) //if zoom is locked, selection is always sane
                 triggerSelectedEvent();
             else {
                 // this counts as a clear
@@ -154,9 +151,12 @@ The plugin allso adds the following methods to the plot object:
 
             return false;
         }
-
-        function getSelection() {
-            if (!selectionIsSane())
+		//force==true -> bypass IsSane check
+        function getSelection(force) {
+			if(typeof force === "undefined")
+				force = false;
+			
+            if (!selectionIsSane()&&!force)
                 return null;
             
             if (!selection.show) return null;
@@ -170,9 +170,27 @@ The plugin allso adds the following methods to the plot object:
             });
             return r;
         }
-
+		///****custom addition****
+		//If the zoom is locked clicking and dragging moves the 
+		//window rather than adjusting it
+		function lockZoom(isLocked){
+			var range, axis;
+			range = getSelection(true); //force selection
+			if(range==null)
+				return;
+			selection.zoomLocked=isLocked;
+			axis = plot.getAxes().xaxis;
+			selection.zoomRange = axis.p2c(range.xaxis.to)-axis.p2c(range.xaxis.from);
+			//console.log("locking zoom to "+selection.zoomRange);
+		}
+		//***end custom addition***
+		
         function triggerSelectedEvent() {
-            var r = getSelection();
+            var r;
+			if(selection.zoomLocked)
+				r = getSelection(true); //force selection- no isSane check
+			else
+				r = getSelection();
 
             plot.getPlaceholder().trigger("plotselected", [ r ]);
 
@@ -198,7 +216,23 @@ The plugin allso adds the following methods to the plot object:
             if (o.selection.mode == "x")
                 pos.y = pos == selection.first ? 0 : plot.height();
         }
-
+		function setFixedSelectionPos(e){
+			//update both the first and second selection positions based off e 
+			//and the saved zoomRange parameter
+            var offset = plot.getPlaceholder().offset();
+            var plotOffset = plot.getPlotOffset();
+			var click_pos ={x:0,y:0};
+            click_pos.x = clamp(0, e.pageX - offset.left - plotOffset.left, plot.width());
+			selection.first.x = clamp(0,click_pos.x-selection.zoomRange/2,plot.width());
+			selection.second.x = clamp(0,click_pos.x+selection.zoomRange/2,plot.width());
+			//console.log(selection.first);
+			//console.log(selection.second);
+            //click_pos.y = pos == selection.first ? 0 : plot.height();
+            //if (selectionIsSane()) {
+                selection.show = true;
+                plot.triggerRedrawOverlay();
+				//}
+		}
         function updateSelection(pos) {
             if (pos.pageX == null)
                 return;
@@ -256,7 +290,14 @@ The plugin allso adds the following methods to the plot object:
             return { from: from, to: to, axis: axis };
         }
         
+        function clearSelection(){
+      			selection.show = false
+      			plot.triggerRedrawOverlay();
+      			return;
+        }
+        
         function setSelection(ranges, preventEvent) {
+        		
             var axis, range, o = plot.getOptions();
 
             if (o.selection.mode == "y") {
@@ -283,12 +324,15 @@ The plugin allso adds the following methods to the plot object:
 
             selection.show = true;
             plot.triggerRedrawOverlay();
+			//call lock zoom with current value of lock
+			//just updates the zoomrange, does not change zoom behavior
+			lockZoom(selection.zoomLocked);
             if (!preventEvent && selectionIsSane())
                 triggerSelectedEvent();
         }
 
         function selectionIsSane() {
-            var minSize = plot.getOptions().selection.minSize;
+            var minSize = 5;
             return Math.abs(selection.second.x - selection.first.x) >= minSize &&
                 Math.abs(selection.second.y - selection.first.y) >= minSize;
         }
@@ -296,7 +340,10 @@ The plugin allso adds the following methods to the plot object:
         plot.clearSelection = clearSelection;
         plot.setSelection = setSelection;
         plot.getSelection = getSelection;
-
+		plot.clearSelection = clearSelection;
+		//***custom addition***
+		plot.lockZoom = lockZoom;
+		
         plot.hooks.bindEvents.push(function(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.selection.mode != null) {
@@ -308,30 +355,40 @@ The plugin allso adds the following methods to the plot object:
 
         plot.hooks.drawOverlay.push(function (plot, ctx) {
             // draw selection
-            if (selection.show && selectionIsSane()) {
-                var plotOffset = plot.getPlotOffset();
-                var o = plot.getOptions();
+            if(!selection.show)
+            	return;
+          	var x = Math.min(selection.first.x, selection.second.x) + 0.5,
+                y = Math.min(selection.first.y, selection.second.y) + 0.5,
+                w = Math.abs(selection.second.x - selection.first.x) - 1,
+                h = Math.abs(selection.second.y - selection.first.y) - 1;
+            //make sure we are in bounds
+            x = Math.max(x,0);
+            x = Math.min(x,plot.width())
+            w = Math.max(w,0);
+            w = Math.min(w,(plot.width()-x));
+            
+            var plotOffset = plot.getPlotOffset();
+            var o = plot.getOptions();
 
-                ctx.save();
-                ctx.translate(plotOffset.left, plotOffset.top);
-
-                var c = $.color.parse(o.selection.color);
-
-                ctx.strokeStyle = c.scale('a', 0.8).toString();
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top);
+            var c = $.color.parse(o.selection.color);
+            ctx.strokeStyle = c.scale('a', 0.8).toString();    
+            if (selectionIsSane()) {
                 ctx.lineWidth = 1;
-                ctx.lineJoin = o.selection.shape;
+                ctx.lineJoin = "round";
                 ctx.fillStyle = c.scale('a', 0.4).toString();
-
-                var x = Math.min(selection.first.x, selection.second.x) + 0.5,
-                    y = Math.min(selection.first.y, selection.second.y) + 0.5,
-                    w = Math.abs(selection.second.x - selection.first.x) - 1,
-                    h = Math.abs(selection.second.y - selection.first.y) - 1;
-
                 ctx.fillRect(x, y, w, h);
                 ctx.strokeRect(x, y, w, h);
-
-                ctx.restore();
-            }
+           }
+           else{
+           		ctx.lineWidth=2;
+           		ctx.moveTo(x,0);
+           		ctx.lineTo(x,plot.height());
+           		ctx.stroke();	
+           }
+           
+           ctx.restore();
         });
         
         plot.hooks.shutdown.push(function (plot, eventHolder) {
@@ -349,9 +406,7 @@ The plugin allso adds the following methods to the plot object:
         options: {
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
-                color: "#e8cfac",
-                shape: "round", // one of "round", "miter", or "bevel"
-                minSize: 5 // minimum number of pixels
+                color: "#e8cfac"
             }
         },
         name: 'selection',

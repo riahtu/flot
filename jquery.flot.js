@@ -650,6 +650,7 @@ Licensed under the MIT license.
             o.top += plotOffset.top;
             return o;
         };
+        plot.exportImage = function(){ return canvas.toDataURL();}
         plot.getData = function () { return series; };
         plot.getAxes = function () {
             var res = {}, i;
@@ -1760,7 +1761,7 @@ Licensed under the MIT license.
 
 				axis.tickFormatter = function (value, axis) {
 
-					var factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
+					var factor = Math.pow(10, axis.tickDecimals);
 					var formatted = "" + Math.round(value * factor) / factor;
 
 					// If tickDecimals was specified, ensure that we have exactly that
@@ -2083,7 +2084,7 @@ Licensed under the MIT license.
 
                     xoff = yoff = 0;
 
-                    if (isNaN(v) || v < axis.min || v > axis.max
+                    if (v < axis.min || v > axis.max
                         // skip those lying on the axes if we got a border
                         || (t == "full"
                             && ((typeof bw == "object" && bw[axis.position] > 0) || bw > 0)
@@ -2524,15 +2525,6 @@ Licensed under the MIT license.
                 sw = series.shadowSize,
                 radius = series.points.radius,
                 symbol = series.points.symbol;
-
-            // If the user sets the line width to 0, we change it to a very 
-            // small value. A line width of 0 seems to force the default of 1.
-            // Doing the conditional here allows the shadow setting to still be 
-            // optional even with a lineWidth of 0.
-
-            if( lw == 0 )
-                lw = 0.0001;
-
             if (lw > 0 && sw > 0) {
                 // draw shadow in two steps
                 var w = sw / 2;
@@ -2721,20 +2713,31 @@ Licensed under the MIT license.
                 return;
             }
 
-            var fragments = [], entries = [], rowStarted = false,
-                lf = options.legend.labelFormatter, s, label;
+            var y1_entries = [], y2_entries = [], s,  
+            		lf = options.legend.labelFormatter, label;
 
-            // Build a list of legend entries, with each having a label and a color
-
+            // Build two lists of legend entries, one for the left and right axis
+						//  with each having a label and a color
             for (var i = 0; i < series.length; ++i) {
                 s = series[i];
                 if (s.label) {
                     label = lf ? lf(s.label, s) : s.label;
                     if (label) {
-                        entries.push({
-                            label: label,
-                            color: s.color
-                        });
+                    		//axisLabel is the units for this axis
+                    		//if units are specified, display them in light gray in parenthesis
+                    		if(options.yaxes[s.yaxis.n-1]['axisLabel'])
+                    			label = label+"  <span class='muted'>("+plot.getOptions()['yaxes'][s.yaxis.n-1]['axisLabel']+")</span>"
+                    		//if units are not specified, just insert the label in the legend
+                    		if(s.yaxis.n==1)
+	                        y1_entries.push({
+	                            label: label,
+	                            color: s.color
+	                        });
+	                      if(s.yaxis.n==2)
+	                        y2_entries.push({
+	                            label: label,
+	                            color: s.color
+	                        });
                     }
                 }
             }
@@ -2743,12 +2746,16 @@ Licensed under the MIT license.
 
             if (options.legend.sorted) {
                 if ($.isFunction(options.legend.sorted)) {
-                    entries.sort(options.legend.sorted);
-                } else if (options.legend.sorted == "reverse") {
-                	entries.reverse();
+                    y1_entries.sort(options.legend.sorted);
+                    y2_entries.sort(options.legend.sorted);
                 } else {
                     var ascending = options.legend.sorted != "descending";
-                    entries.sort(function(a, b) {
+                    y1_entries.sort(function(a, b) {
+                        return a.label == b.label ? 0 : (
+                            (a.label < b.label) != ascending ? 1 : -1   // Logical XOR
+                        );
+                    });
+                    y2_entries.sort(function(a, b) {
                         return a.label == b.label ? 0 : (
                             (a.label < b.label) != ascending ? 1 : -1   // Logical XOR
                         );
@@ -2757,66 +2764,82 @@ Licensed under the MIT license.
             }
 
             // Generate markup for the list of entries, in their final order
-
-            for (var i = 0; i < entries.length; ++i) {
-
-                var entry = entries[i];
-
-                if (i % options.legend.noColumns == 0) {
-                    if (rowStarted)
-                        fragments.push('</tr>');
-                    fragments.push('<tr>');
-                    rowStarted = true;
-                }
-
-                fragments.push(
-                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
-                    '<td class="legendLabel">' + entry.label + '</td>'
-                );
-            }
-
-            if (rowStarted)
-                fragments.push('</tr>');
-
-            if (fragments.length == 0)
-                return;
-
-            var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
-            if (options.legend.container != null)
-                $(options.legend.container).html(table);
-            else {
-                var pos = "",
-                    p = options.legend.position,
-                    m = options.legend.margin;
-                if (m[0] == null)
-                    m = [m, m];
-                if (p.charAt(0) == "n")
-                    pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
-                else if (p.charAt(0) == "s")
-                    pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
-                if (p.charAt(1) == "e")
-                    pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
-                else if (p.charAt(1) == "w")
-                    pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
-                var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(placeholder);
-                if (options.legend.backgroundOpacity != 0.0) {
-                    // put in the transparent background
-                    // separately to avoid blended labels and
-                    // label boxes
-                    var c = options.legend.backgroundColor;
-                    if (c == null) {
-                        c = options.grid.backgroundColor;
-                        if (c && typeof c == "string")
-                            c = $.color.parse(c);
-                        else
-                            c = $.color.extract(legend, 'background-color');
-                        c.a = 1;
-                        c = c.toString();
-                    }
-                    var div = legend.children();
-                    $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
-                }
-            }
+						for(var j=0;j<2;j++){
+							var entries = null;
+							if(j==0)
+								entries = y1_entries;
+							else
+								entries = y2_entries;
+					//--------original code repeated twice, for y1 and y2 axes ------ //
+							var rowStarted = false, fragments = [];
+	            for (var i = 0; i < entries.length; ++i) {
+	
+	                var entry = entries[i];
+	
+	                if (i % options.legend.noColumns == 0) {
+	                    if (rowStarted)
+	                        fragments.push('</tr>');
+	                    fragments.push('<tr>');
+	                    rowStarted = true;
+	                }
+	
+	                fragments.push(
+	                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
+	                    '<td class="legendLabel">' + entry.label + '</td>'
+	                );
+	            }
+						
+	            if (rowStarted)
+	                fragments.push('</tr>');
+	
+	            if (fragments.length == 0)
+	                continue;
+	
+	            var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
+	            if (options.legend.container != null)
+	                $(options.legend.container).html(table);
+	            else {
+	                var pos = "",
+	                    p = options.legend.position, //(override this option)
+	                    m = options.legend.margin;
+	                //force legend position depending on current axis
+	                if(options.legend.split){
+		                if(j==0)
+		                	p = 'nw'
+		                if(j==1)
+		                	p = 'ne'
+		               }
+	                	
+	                if (m[0] == null)
+	                    m = [m, m];
+	                if (p.charAt(0) == "n")
+	                    pos += 'top:' + (m[1] + plotOffset.top) + 'px;';
+	                else if (p.charAt(0) == "s")
+	                    pos += 'bottom:' + (m[1] + plotOffset.bottom) + 'px;';
+	                if (p.charAt(1) == "e")
+	                    pos += 'right:' + (m[0] + plotOffset.right) + 'px;';
+	                else if (p.charAt(1) == "w")
+	                    pos += 'left:' + (m[0] + plotOffset.left) + 'px;';
+	                var legend = $('<div class="legend">' + table.replace('style="', 'style="position:absolute;' + pos +';') + '</div>').appendTo(placeholder);
+	                if (options.legend.backgroundOpacity != 0.0) {
+	                    // put in the transparent background
+	                    // separately to avoid blended labels and
+	                    // label boxes
+	                    var c = options.legend.backgroundColor;
+	                    if (c == null) {
+	                        c = options.grid.backgroundColor;
+	                        if (c && typeof c == "string")
+	                            c = $.color.parse(c);
+	                        else
+	                            c = $.color.extract(legend, 'background-color');
+	                        c.a = 1;
+	                        c = c.toString();
+	                    }
+	                    var div = legend.children();
+	                    $('<div style="position:absolute;width:' + div.width() + 'px;height:' + div.height() + 'px;' + pos +'background-color:' + c + ';"> </div>').prependTo(legend).css('opacity', options.legend.backgroundOpacity);
+	                }
+            	}
+           }
         }
 
 
@@ -3139,8 +3162,6 @@ Licensed under the MIT license.
         }
     }
 
-    // Add the plot function to the top level of the jQuery object
-
     $.plot = function(placeholder, data, options) {
         //var t0 = new Date();
         var plot = new Plot($(placeholder), data, options, $.plot.plugins);
@@ -3151,6 +3172,7 @@ Licensed under the MIT license.
     $.plot.version = "0.8.3";
 
     $.plot.plugins = [];
+
 
     // Also add the plot function as a chainable property
 
