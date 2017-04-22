@@ -91,7 +91,7 @@ jquery.event.drag.js ~ v1.5 ~ Copyright (c) 2008, Three Dub Media (http://threed
 Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-LICENSE.txt
 */
 
-(function(E){E.fn.drag=function(L,K,J){if(K){this.bind("dragstart",L)}if(J){this.bind("dragend",J)}return !L?this.trigger("drag"):this.bind("drag",K?K:L)};var A=E.event,B=A.special,F=B.drag={not:":input",distance:0,which:1,dragging:false,setup:function(J){J=E.extend({distance:F.distance,which:F.which,not:F.not},J||{});J.distance=I(J.distance);A.add(this,"mousedown",H,J);if(this.attachEvent){this.attachEvent("ondragstart",D)}},teardown:function(){A.remove(this,"mousedown",H);if(this===F.dragging){F.dragging=F.proxy=false}G(this,true);if(this.detachEvent){this.detachEvent("ondragstart",D)}}};B.dragstart=B.dragend={setup:function(){},teardown:function(){}};function H(L){var K=this,J,M=L.data||{};if(M.elem){K=L.dragTarget=M.elem;L.dragProxy=F.proxy||K;L.cursorOffsetX=M.pageX-M.left;L.cursorOffsetY=M.pageY-M.top;L.offsetX=L.pageX-L.cursorOffsetX;L.offsetY=L.pageY-L.cursorOffsetY}else{if(F.dragging||(M.which>0&&L.which!=M.which)||E(L.target).is(M.not)){return }}switch(L.type){case"mousedown":E.extend(M,E(K).offset(),{elem:K,target:L.target,pageX:L.pageX,pageY:L.pageY});A.add(document,"mousemove mouseup",H,M);G(K,false);F.dragging=null;return false;case !F.dragging&&"mousemove":if(I(L.pageX-M.pageX)+I(L.pageY-M.pageY)<M.distance){break}L.target=M.target;J=C(L,"dragstart",K);if(J!==false){F.dragging=K;F.proxy=L.dragProxy=E(J||K)[0]}case"mousemove":if(F.dragging){J=C(L,"drag",K);if(B.drop){B.drop.allowed=(J!==false);B.drop.handler(L)}if(J!==false){break}L.type="mouseup"}case"mouseup":A.remove(document,"mousemove mouseup",H);if(F.dragging){if(B.drop){B.drop.handler(L)}C(L,"dragend",K)}G(K,true);F.dragging=F.proxy=M.elem=false;break}return true}function C(M,K,L){M.type=K;var J=E.event.handle.call(L,M);return J===false?false:J||M.result}function I(J){return Math.pow(J,2)}function D(){return(F.dragging===false)}function G(K,J){if(!K){return }K.unselectable=J?"off":"on";K.onselectstart=function(){return J};if(K.style){K.style.MozUserSelect=J?"":"none"}}})(jQuery);
+(function (E) { E.fn.drag = function (L, K, J) { if (K) { this.bind("dragstart", L) } if (J) { this.bind("dragend", J) } return !L ? this.trigger("drag") : this.bind("drag", K ? K : L) }; var A = E.event, B = A.special, F = B.drag = { not: ":input", distance: 0, which: 1, dragging: false, setup: function (J) { J = E.extend({ distance: F.distance, which: F.which, not: F.not }, J || {}); J.distance = I(J.distance); A.add(this, "mousedown", H, J); if (this.attachEvent) { this.attachEvent("ondragstart", D) } }, teardown: function () { A.remove(this, "mousedown", H); if (this === F.dragging) { F.dragging = F.proxy = false } G(this, true); if (this.detachEvent) { this.detachEvent("ondragstart", D) } } }; B.dragstart = B.dragend = { setup: function () { }, teardown: function () { } }; function H(L) { var K = this, J, M = L.data || {}; if (M.elem) { K = L.dragTarget = M.elem; L.dragProxy = F.proxy || K; L.cursorOffsetX = M.pageX - M.left; L.cursorOffsetY = M.pageY - M.top; L.offsetX = L.pageX - L.cursorOffsetX; L.offsetY = L.pageY - L.cursorOffsetY } else { if (F.dragging || (M.which > 0 && L.which != M.which) || E(L.target).is(M.not)) { return } } switch (L.type) { case "mousedown": E.extend(M, E(K).offset(), { elem: K, target: L.target, pageX: L.pageX, pageY: L.pageY }); A.add(document, "mousemove mouseup", H, M); G(K, false); F.dragging = null; return false; case !F.dragging && "mousemove": if (I(L.pageX - M.pageX) + I(L.pageY - M.pageY) < M.distance) { break } L.target = M.target; J = C(L, "dragstart", K); if (J !== false) { F.dragging = K; F.proxy = L.dragProxy = E(J || K)[0] } case "mousemove": if (F.dragging) { J = C(L, "drag", K); if (B.drop) { B.drop.allowed = (J !== false); B.drop.handler(L) } if (J !== false) { break } L.type = "mouseup" } case "mouseup": A.remove(document, "mousemove mouseup", H); if (F.dragging) { if (B.drop) { B.drop.handler(L) } C(L, "dragend", K) } G(K, true); F.dragging = F.proxy = M.elem = false; break }return true } function C(M, K, L) { M.type = K; var J = E.event.handle.call(L, M); return J === false ? false : J || M.result } function I(J) { return Math.pow(J, 2) } function D() { return (F.dragging === false) } function G(K, J) { if (!K) { return } K.unselectable = J ? "off" : "on"; K.onselectstart = function () { return J }; if (K.style) { K.style.MozUserSelect = J ? "" : "none" } } })(jQuery);
 
 
 /* jquery.mousewheel.min.js
@@ -130,9 +130,9 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
     };
 
     function init(plot) {
-    
+
         function onZoomClick(e, zoomOut) {
-				
+
             var c = plot.offset();
             c.left = e.pageX - c.left;
             c.top = e.pageY - c.top;
@@ -141,143 +141,145 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             else
                 plot.zoom({ center: c });
         }
-        var X_AXIS=0; var Y1_AXIS=1; var Y2_AXIS=2; var UNSPECIFIED_AXIS=-1;
-        var ZOOM_BOUND=0.25;
-        var RESIZE_BOUND=0.05;
-				var zoomableAxis = -1;
-				var resizableAxis = -1;
-				
-				function onMouseMove(plot,e){
-          //if panning isn't enabled, just return
-          if(plot.getOptions()['pan']['interactive']==false)
-            return;
-          
-				    var offset = plot.offset();
- 				    plot.triggerRedrawOverlay();
- 				    var x = (e.pageX -offset.left)/plot.width();
- 				    var y = (e.pageY - offset.top)/plot.height(); 
- 				    x = Math.max(0,Math.min(1,x));
- 				    y = Math.max(0,Math.min(1,y));
- 				    y1_val=x;
- 				    y2_val=1-x;
- 				    x_val=1-y;
- 				    //check for axis zoomability
- 				    var oldZoomable=zoomableAxis;
- 				    var oldResizable = resizableAxis;
- 				    resizableAxis=UNSPECIFIED_AXIS;
- 				    if(x_val<ZOOM_BOUND && x_val<y1_val && x_val<y2_val){
- 				    	zoomableAxis = X_AXIS;
- 				    	if(x_val<RESIZE_BOUND){
- 				    		resizableAxis=X_AXIS;}
- 				    } else if(y1_val<ZOOM_BOUND && y1_val<x_val){
- 				    	zoomableAxis = Y1_AXIS;
- 				    	if(y1_val<RESIZE_BOUND){
- 				    		resizableAxis=Y1_AXIS;}
- 				    } else if(y2_val<ZOOM_BOUND && y2_val<x_val){
-              //check if this plot has a y2 axis
-              if(plot.getAxes()['y2axis']['show']){
- 				    	  zoomableAxis = Y2_AXIS;
-   				    	if(y2_val<RESIZE_BOUND){
-   				    		resizableAxis=Y2_AXIS;
+        var X_AXIS = 0; var Y1_AXIS = 1; var Y2_AXIS = 2; var UNSPECIFIED_AXIS = -1;
+        var ZOOM_BOUND = 0.25;
+        var RESIZE_BOUND = 0.05;
+        var zoomableAxis = -1;
+        var resizableAxis = -1;
+
+        function onMouseMove(plot, e) {
+            //if panning isn't enabled, just return
+            if (plot.getOptions()['pan']['interactive'] == false)
+                return;
+
+            var offset = plot.offset();
+            plot.triggerRedrawOverlay();
+            var x = (e.pageX - offset.left) / plot.width();
+            var y = (e.pageY - offset.top) / plot.height();
+            x = Math.max(0, Math.min(1, x));
+            y = Math.max(0, Math.min(1, y));
+            y1_val = x;
+            y2_val = 1 - x;
+            x_val = 1 - y;
+            //check for axis zoomability
+            var oldZoomable = zoomableAxis;
+            var oldResizable = resizableAxis;
+            resizableAxis = UNSPECIFIED_AXIS;
+            if (x_val < ZOOM_BOUND && x_val < y1_val && x_val < y2_val) {
+                zoomableAxis = X_AXIS;
+                if (x_val < RESIZE_BOUND) {
+                    resizableAxis = X_AXIS;
                 }
-              } else {
-                zoomableAxis = UNSPECIFIED_AXIS; //no y2 axis
-              }
- 				    } else {
- 				    	zoomableAxis = UNSPECIFIED_AXIS;
- 				    }
-						//check for axis resiablity
-						
-						if(resizableAxis != oldResizable)			    
-		    	 		plot.getPlaceholder().trigger("setResizableAxis", [ resizableAxis ]);
+            } else if (y1_val < ZOOM_BOUND && y1_val < x_val) {
+                zoomableAxis = Y1_AXIS;
+                if (y1_val < RESIZE_BOUND) {
+                    resizableAxis = Y1_AXIS;
+                }
+            } else if (y2_val < ZOOM_BOUND && y2_val < x_val) {
+                //check if this plot has a y2 axis
+                if (plot.getAxes()['y2axis']['show']) {
+                    zoomableAxis = Y2_AXIS;
+                    if (y2_val < RESIZE_BOUND) {
+                        resizableAxis = Y2_AXIS;
+                    }
+                } else {
+                    zoomableAxis = UNSPECIFIED_AXIS; //no y2 axis
+                }
+            } else {
+                zoomableAxis = UNSPECIFIED_AXIS;
+            }
+            //check for axis resiablity
 
- 				    //console.log("x:"+x_val+ " y1:"+y1_val+ " y2:"+ y2_val);
+            if (resizableAxis != oldResizable)
+                plot.getPlaceholder().trigger("setResizableAxis", [resizableAxis]);
 
-				  //  console.log(e);
+            //console.log("x:"+x_val+ " y1:"+y1_val+ " y2:"+ y2_val);
+
+            //  console.log(e);
             //crosshair.x = Math.max(0, Math.min(e.pageX - offset.left, plot.width()));
             //crosshair.y = Math.max(0, Math.min(e.pageY - offset.top, plot.height()));
-         
-				}
-				function onMouseOut(plot,e){
-          //if panning isn't enabled, just return
-          if(plot.getOptions()['pan']['interactive']==false)
-            return;
-          
-					//check to see if the mouse actually left the plot or its just in the resize button 
-					//(add 5 padding to account for resize button widths)
-					if(e.pageX>=(plot.offset().left - 5) && e.pageX<=(plot.offset().left+plot.width()+10))
-							if(e.pageY>=plot.offset().top && e.pageY<=(plot.offset().top+plot.height()+15))
-								return;
-					
-					zoomableAxis=UNSPECIFIED_AXIS;
-					resizableAxis=UNSPECIFIED_AXIS;
-					plot.getPlaceholder().trigger("setResizableAxis", [ resizableAxis ]);
-					plot.triggerRedrawOverlay();
-				}
-				function highlightZoomAxis(plot,ctx){
-					var plotOffset = plot.getPlotOffset();
-					//drawZoomRegions(plot,ctx);
-					ctx.save();
-					ctx.translate(plotOffset.left,plotOffset.top); //so our coordinates are 0,0
-					ctx.strokeStyle="rgba(255,255,0,0.50)";//"rgba(232, 207, 172, 0.30)";
-					ctx.lineWidth=10;
-					ctx.beginPath();
-					switch(zoomableAxis){
-						case Y1_AXIS:
-							ctx.moveTo(0,0);
-							ctx.lineTo(0,plot.height());
-							break;
-						case Y2_AXIS:
-							ctx.moveTo(plot.width(),plot.height());
-							ctx.lineTo(plot.width(),0)
-							break;
-						case X_AXIS:
-							ctx.moveTo(0,plot.height())
-							ctx.lineTo(plot.width(),plot.height());
-							break;	
-						default: //no zoomable axis
-							break;
-					}
-					ctx.stroke();
-					ctx.restore();
-				}
-				function drawZoomRegions(plot,ctx){
-					var plotOffset = plot.getPlotOffset();
-					ctx.save();
-					ctx.translate(plotOffset.left,plotOffset.top); //so our coordinates are 0,0
-					ctx.strokeStyle="rgba(0, 170, 0, 0.80)";
-					ctx.lineWidth=2;
-					ctx.beginPath();
-					ctx.moveTo(ZOOM_BOUND*plot.width(),0);
-					ctx.lineTo(ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
-					ctx.lineTo(0,plot.height());
-					ctx.moveTo(ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
-					ctx.lineTo(plot.width()-ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
-					ctx.lineTo(plot.width(),plot.height());
-					ctx.moveTo(plot.width()-ZOOM_BOUND*plot.width(),plot.height()-ZOOM_BOUND*plot.height());
-					ctx.lineTo(plot.width()-ZOOM_BOUND*plot.width(),0)
-					ctx.stroke();
-					ctx.restore();
-				}
-        function onMouseWheel(e, delta) {
-          //if zooming isn't enabled, just return
-          if(plot.getOptions()['zoom']['interactive']==false)
-            return;
-          
-          onZoomClick(e, delta < 0);
-//			e.stopPropagation();
-          return false;
 
         }
-        
+        function onMouseOut(plot, e) {
+            //if panning isn't enabled, just return
+            if (plot.getOptions()['pan']['interactive'] == false)
+                return;
+
+            //check to see if the mouse actually left the plot or its just in the resize button 
+            //(add 5 padding to account for resize button widths)
+            if (e.pageX >= (plot.offset().left - 5) && e.pageX <= (plot.offset().left + plot.width() + 10))
+                if (e.pageY >= plot.offset().top && e.pageY <= (plot.offset().top + plot.height() + 15))
+                    return;
+
+            zoomableAxis = UNSPECIFIED_AXIS;
+            resizableAxis = UNSPECIFIED_AXIS;
+            plot.getPlaceholder().trigger("setResizableAxis", [resizableAxis]);
+            plot.triggerRedrawOverlay();
+        }
+        function highlightZoomAxis(plot, ctx) {
+            var plotOffset = plot.getPlotOffset();
+            //drawZoomRegions(plot,ctx);
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top); //so our coordinates are 0,0
+            ctx.strokeStyle = "rgba(255,255,0,0.50)";//"rgba(232, 207, 172, 0.30)";
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            switch (zoomableAxis) {
+                case Y1_AXIS:
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(0, plot.height());
+                    break;
+                case Y2_AXIS:
+                    ctx.moveTo(plot.width(), plot.height());
+                    ctx.lineTo(plot.width(), 0)
+                    break;
+                case X_AXIS:
+                    ctx.moveTo(0, plot.height())
+                    ctx.lineTo(plot.width(), plot.height());
+                    break;
+                default: //no zoomable axis
+                    break;
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+        function drawZoomRegions(plot, ctx) {
+            var plotOffset = plot.getPlotOffset();
+            ctx.save();
+            ctx.translate(plotOffset.left, plotOffset.top); //so our coordinates are 0,0
+            ctx.strokeStyle = "rgba(0, 170, 0, 0.80)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ZOOM_BOUND * plot.width(), 0);
+            ctx.lineTo(ZOOM_BOUND * plot.width(), plot.height() - ZOOM_BOUND * plot.height());
+            ctx.lineTo(0, plot.height());
+            ctx.moveTo(ZOOM_BOUND * plot.width(), plot.height() - ZOOM_BOUND * plot.height());
+            ctx.lineTo(plot.width() - ZOOM_BOUND * plot.width(), plot.height() - ZOOM_BOUND * plot.height());
+            ctx.lineTo(plot.width(), plot.height());
+            ctx.moveTo(plot.width() - ZOOM_BOUND * plot.width(), plot.height() - ZOOM_BOUND * plot.height());
+            ctx.lineTo(plot.width() - ZOOM_BOUND * plot.width(), 0)
+            ctx.stroke();
+            ctx.restore();
+        }
+        function onMouseWheel(e, delta) {
+            //if zooming isn't enabled, just return
+            if (plot.getOptions()['zoom']['interactive'] == false)
+                return;
+
+            onZoomClick(e, delta < 0);
+            //			e.stopPropagation();
+            return false;
+
+        }
+
         var prevCursor = 'default', prevPageX = 0, prevPageY = 0,
             panTimeout = null;
 
         function onDragStart(e) {
-          //if panning isn't enabled, just return
-          if(plot.getOptions()['pan']['interactive']==false)
-            return;
-          
+            //if panning isn't enabled, just return
+            if (plot.getOptions()['pan']['interactive'] == false)
+                return;
+
             if (e.which != 1)  // only accept left-click
                 return false;
             var c = plot.getPlaceholder().css('cursor');
@@ -287,53 +289,55 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             prevPageX = e.pageX;
             prevPageY = e.pageY;
         }
-        
+
         function onDrag(e) {
-          //if panning isn't enabled, just return
-          if(plot.getOptions()['pan']['interactive']==false)
-            return;
-          
+            //if panning isn't enabled, just return
+            if (plot.getOptions()['pan']['interactive'] == false)
+                return;
+
             var frameRate = plot.getOptions().pan.frameRate;
             if (panTimeout || !frameRate)
                 return;
 
             panTimeout = setTimeout(function () {
-                plot.pan({ left: prevPageX - e.pageX,
-                           top: prevPageY - e.pageY
-						 });
+                plot.pan({
+                    left: prevPageX - e.pageX,
+                    top: prevPageY - e.pageY
+                });
                 prevPageX = e.pageX;
                 prevPageY = e.pageY;
-                                                    
+
                 panTimeout = null;
             }, 1 / frameRate * 1000);
         }
 
         function onDragEnd(e) {
-          //if panning isn't enabled, just return
-          if(plot.getOptions()['pan']['interactive']==false)
-            return;
-          
+            //if panning isn't enabled, just return
+            if (plot.getOptions()['pan']['interactive'] == false)
+                return;
+
             if (panTimeout) {
                 clearTimeout(panTimeout);
                 panTimeout = null;
             }
-                    
+
             plot.getPlaceholder().css('cursor', prevCursor);
-            plot.pan({ left: prevPageX - e.pageX,
-                       top: prevPageY - e.pageY
-					 });
+            plot.pan({
+                left: prevPageX - e.pageX,
+                top: prevPageY - e.pageY
+            });
         }
-        
+
         function bindEvents(plot, eventHolder) {
             var o = plot.getOptions();
             if (o.zoom.interactive) {
                 eventHolder[o.zoom.trigger](onZoomClick);
                 eventHolder.mousewheel(onMouseWheel);
-                eventHolder.mousemove(function(e){
-                	onMouseMove(plot,e);
+                eventHolder.mousemove(function (e) {
+                    onMouseMove(plot, e);
                 })
-                eventHolder.mouseout(function(e){
-                	onMouseOut(plot,e);
+                eventHolder.mouseout(function (e) {
+                    onMouseOut(plot, e);
                 })
             }
 
@@ -343,29 +347,29 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                 eventHolder.bind("dragend", onDragEnd);
             }
         }
-				plot.hooks.drawOverlay.push(highlightZoomAxis)
+        plot.hooks.drawOverlay.push(highlightZoomAxis)
         plot.zoomOut = function (args) {
             if (!args)
                 args = {};
-            
+
             if (!args.amount)
                 args.amount = plot.getOptions().zoom.amount
 
             args.amount = 1 / args.amount;
             plot.zoom(args);
         }
-        
+
         plot.zoom = function (args) {
             if (!args)
                 args = {};
-            
+
             var c = args.center,
                 amount = args.amount || plot.getOptions().zoom.amount,
                 w = plot.width(), h = plot.height();
 
             if (!c)
                 c = { left: w / 2, top: h / 2 };
-                
+
             var xf = c.left / w,
                 yf = c.top / h,
                 minmax = {
@@ -379,7 +383,7 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     }
                 };
 
-            $.each(plot.getAxes(), function(_, axis) {
+            $.each(plot.getAxes(), function (_, axis) {
                 var opts = axis.options,
                     min = minmax[axis.direction].min,
                     max = minmax[axis.direction].max,
@@ -387,15 +391,18 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
 
                 if (zr === false) // no zooming on this axis
                     return;
+                //do not allow zoom on interval-only axes
+                if(axis.n==3 || axis.n==4)
+                    return;
                 //zoom Y axis only (if requested)
-				if(!(axis.direction=="y"&&axis.n==1) && (zoomableAxis==Y1_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
-					return;
-				//zoom Y2 axis only (if requested)
-				if(!(axis.direction=="y"&&axis.n==2) && (zoomableAxis==Y2_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
-					return;
-				//zoom X axis zooming if requested
-				if(axis.direction!="x" && (zoomableAxis==X_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
-					return;
+                if (!(axis.direction == "y" && axis.n == 1) && (zoomableAxis == Y1_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
+                    return;
+                //zoom Y2 axis only (if requested)
+                if (!(axis.direction == "y" && axis.n == 2) && (zoomableAxis == Y2_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
+                    return;
+                //zoom X axis zooming if requested
+                if (axis.direction != "x" && (zoomableAxis == X_AXIS))//||zoomableAxis==UNSPECIFIED_AXIS))
+                    return;
                 min = axis.c2p(min);
                 max = axis.c2p(max);
 
@@ -406,30 +413,30 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     max = tmp;
                 }
 
-				//make sure we aren't zooming out of the panning range
+                //make sure we aren't zooming out of the panning range
 
-//				min=Math.max(min,opts['panRange'][0])
+                //				min=Math.max(min,opts['panRange'][0])
 
-//				max=Math.min(max,opts['panRange'][1])
+                //				max=Math.min(max,opts['panRange'][1])
 
-/*                var range = max - min;
-                if (zr &&
-                    ((zr[0] != null && range < zr[0] && amount >1) ||
-                     (zr[1] != null && range > zr[1] && amount <1)))
-                    return;
-*/            
+                /*                var range = max - min;
+                                if (zr &&
+                                    ((zr[0] != null && range < zr[0] && amount >1) ||
+                                     (zr[1] != null && range > zr[1] && amount <1)))
+                                    return;
+                */
 
                 opts.min = min;
                 opts.max = max;
             });
 
-            var showY2=	plot.getAxes()['y2axis']['show']
+            var showY2 = plot.getAxes()['y2axis']['show']
             plot.setupGrid();
-			      plot.getAxes()['y2axis']['show']=showY2
+            plot.getAxes()['y2axis']['show'] = showY2
             plot.draw();
-            
+
             if (!args.preventEvent)
-                plot.getPlaceholder().trigger("plotzoom", [ plot ]);
+                plot.getPlaceholder().trigger("plotzoom", [plot]);
         }
 
         plot.pan = function (args) {
@@ -448,47 +455,50 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
                     min, max, d = delta[axis.direction];
 
                 min = axis.c2p(axis.p2c(axis.min) + d),
-                max = axis.c2p(axis.p2c(axis.max) + d);
+                    max = axis.c2p(axis.p2c(axis.max) + d);
 
                 var pr = opts.panRange;
                 if (pr === false) // no panning on this axis
                     return;
+                //do not allow pan on interval-only axes (3,4)
+                if(axis.n==3 || axis.n==4)
+                    return;
                 //check if the cursor position has locked this axis
-								if((axis.direction=="y"&&axis.n==1) && zoomableAxis==Y2_AXIS)
-									return;
-				                //check if the cursor position has locked this axis
-								if((axis.direction=="y"&&axis.n==2) && zoomableAxis==Y1_AXIS)
-									return;
-				//disable pan limit checking!
-/*	
-	
-
-                if (pr) {
-                    // check whether we hit the wall
-                    if (pr[0] != null && pr[0] > min) {
-                        d = pr[0] - min;
-                        min += d;
-                        max += d;
-                    }
-                    
-                    if (pr[1] != null && pr[1] < max) {
-                        d = pr[1] - max;
-                        min += d;
-                        max += d;
-                    }
-                }
-  */              
+                if ((axis.direction == "y" && axis.n == 1) && zoomableAxis == Y2_AXIS)
+                    return;
+                //check if the cursor position has locked this axis
+                if ((axis.direction == "y" && axis.n == 2) && zoomableAxis == Y1_AXIS)
+                    return;
+                //disable pan limit checking!
+                /*	
+                	
+                
+                                if (pr) {
+                                    // check whether we hit the wall
+                                    if (pr[0] != null && pr[0] > min) {
+                                        d = pr[0] - min;
+                                        min += d;
+                                        max += d;
+                                    }
+                                    
+                                    if (pr[1] != null && pr[1] < max) {
+                                        d = pr[1] - max;
+                                        min += d;
+                                        max += d;
+                                    }
+                                }
+                  */
                 opts.min = min;
                 opts.max = max;
             });
-            var showY2=	plot.getAxes()['y2axis']['show']
+            var showY2 = plot.getAxes()['y2axis']['show']
             plot.setupGrid();
-			plot.getAxes()['y2axis']['show']=showY2
+            plot.getAxes()['y2axis']['show'] = showY2
 
             plot.draw();
-            
+
             if (!args.preventEvent)
-                plot.getPlaceholder().trigger("plotpan", [ plot ]);
+                plot.getPlaceholder().trigger("plotpan", [plot]);
         }
 
         function shutdown(plot, eventHolder) {
@@ -500,11 +510,11 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
             if (panTimeout)
                 clearTimeout(panTimeout);
         }
-        
+
         plot.hooks.bindEvents.push(bindEvents);
         plot.hooks.shutdown.push(shutdown);
     }
-    
+
     $.plot.plugins.push({
         init: init,
         options: options,

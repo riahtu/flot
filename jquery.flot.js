@@ -2717,7 +2717,7 @@ Licensed under the MIT license.
             		lf = options.legend.labelFormatter, label;
 
             // Build two lists of legend entries, one for the left and right axis
-						//  with each having a label and a color
+			//  with each having a label and a color
             for (var i = 0; i < series.length; ++i) {
                 s = series[i];
                 if (s.label) {
@@ -2725,15 +2725,18 @@ Licensed under the MIT license.
                     if (label) {
                     		//axisLabel is the units for this axis
                     		//if units are specified, display them in light gray in parenthesis
-                    		if(options.yaxes[s.yaxis.n-1]['axisLabel'])
-                    			label = label+"  <span class='muted'>("+plot.getOptions()['yaxes'][s.yaxis.n-1]['axisLabel']+")</span>"
+                    		/*if(options.yaxes[s.yaxis.n-1]['axisLabel'])
+                    			label = label+"  <span class='muted'>("+plot.getOptions()['yaxes'][s.yaxis.n-1]['axisLabel']+")</span>"*/
                     		//if units are not specified, just insert the label in the legend
-                    		if(s.yaxis.n==1)
+                            if(s.yaxis.n==3||s.yaxis.n==4){
+                                label+="  <i class='fa fa-exclamation-triangle' [tooltip]='`insufficient decimation`'></i>";
+                            }
+                    		if(s.yaxis.n==1||s.yaxis.n==3)
 	                        y1_entries.push({
 	                            label: label,
 	                            color: s.color
 	                        });
-	                      if(s.yaxis.n==2)
+	                      if(s.yaxis.n==2||s.yaxis.n==4)
 	                        y2_entries.push({
 	                            label: label,
 	                            color: s.color
@@ -2784,7 +2787,7 @@ Licensed under the MIT license.
 	                }
 	
 	                fragments.push(
-	                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
+	                    '<td class="legendColorBox"><div style="border:1px solid ' + options.legend.labelBoxBorderColor + ';padding:1px; margin-right:4px;"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
 	                    '<td class="legendLabel">' + entry.label + '</td>'
 	                );
 	            }
