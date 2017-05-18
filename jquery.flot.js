@@ -1285,6 +1285,11 @@ Licensed under the MIT license.
                         xmax += delta + s.bars.barWidth;
                     }
                 }
+                //override y limits if defaults are specified
+                if(s.default_min!=null)
+                    ymin = s.default_min;
+                if(s.default_max!=null)
+                    ymax = s.default_max;
 
                 updateAxis(s.xaxis, xmin, xmax);
                 updateAxis(s.yaxis, ymin, ymax);
