@@ -2792,7 +2792,7 @@ Licensed under the MIT license.
 	                }
 	
 	                fragments.push(
-	                    '<td class="legendColorBox"><div style="border:2px solid black; background:' + options.legend.labelBoxBorderColor + '; margin-right:4px;"><div style="width:4px;height:0;border:5px solid ' + entry.color + ';overflow:hidden"></div></div></td>' +
+	                    '<td class="legendColorBox"><div style="margin-right:4px;"><div style="width:15px;height:15px;background:' + entry.color + ';overflow:hidden;border-style: solid;border-width: 2px;border-color: black;"></div></div></td>' +
 	                    '<td class="legendLabel">' + entry.label + '</td>'
 	                );
 	            }
