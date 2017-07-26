@@ -6,7 +6,8 @@ Licensed under the MIT license.
 The plugin supports these options:
 
 selection: {
-	mode: null or "x" or "y" or "xy",
+    mode: null or "x" or "y" or "xy",
+    interactive: true, //CUSTOM ADDITION
 	color: color
 }
 
@@ -82,9 +83,13 @@ The plugin allso adds the following methods to the plot object:
         var savedhandlers = {};
 
         var mouseUpHandler = null;
+        var mouseUpFired = false;
         
         function onMouseMove(e) {
-			
+			//if selection isn't enabled, just return
+            if (plot.getOptions()['selection']['interactive'] == false)
+                return;
+
             if (!selection.zoomLocked && selection.active) {
                 updateSelection(e);          
                 plot.getPlaceholder().trigger("plotselecting", [ getSelection() ]);
@@ -96,14 +101,15 @@ The plugin allso adds the following methods to the plot object:
         }
 
         function onMouseDown(e) {
-			
+			//if selection isn't enabled, just return
+            if (plot.getOptions()['selection']['interactive'] == false)
+                return
 			
             if (e.which != 1)  // only accept left-click
                 return;
             
             // cancel out any text selections
             document.body.focus();
-
             // prevent text selection and drag in old-school browsers
             if (document.onselectstart !== undefined && savedhandlers.onselectstart == null) {
                 savedhandlers.onselectstart = document.onselectstart;
@@ -122,11 +128,14 @@ The plugin allso adds the following methods to the plot object:
             // this is a bit silly, but we have to use a closure to be
             // able to whack the same handler again
             mouseUpHandler = function (e) { onMouseUp(e); };
-            
+            mouseUpFired = false;
             $(document).one("mouseup", mouseUpHandler);
         }
 
         function onMouseUp(e) {
+            if(mouseUpFired)
+                return false; //spurious call
+            mouseUpFired=true;
             mouseUpHandler = null;
             
             // revert drag stuff for old-school browsers
@@ -406,7 +415,8 @@ The plugin allso adds the following methods to the plot object:
         options: {
             selection: {
                 mode: null, // one of null, "x", "y" or "xy"
-                color: "#e8cfac"
+                color: "#e8cfac",
+                interactive: true
             }
         },
         name: 'selection',
