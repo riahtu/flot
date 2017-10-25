@@ -2732,7 +2732,8 @@ Licensed under the MIT license.
                     		//if units are specified, display them in light gray in parenthesis
                     		/*if(options.yaxes[s.yaxis.n-1]['axisLabel'])
                     			label = label+"  <span class='muted'>("+plot.getOptions()['yaxes'][s.yaxis.n-1]['axisLabel']+")</span>"*/
-                    		//if units are not specified, just insert the label in the legend
+                            //if units are not specified, just insert the label in the legend
+                            
                             if(s.yaxis.n==3||s.yaxis.n==4){
                                 label+="  <i class='fa fa-exclamation-triangle' [tooltip]='`insufficient decimation`'></i>";
                             }
@@ -2772,12 +2773,12 @@ Licensed under the MIT license.
             }
 
             // Generate markup for the list of entries, in their final order
-						for(var j=0;j<2;j++){
-							var entries = null;
-							if(j==0)
-								entries = y1_entries;
-							else
-								entries = y2_entries;
+            for(var j=0;j<2;j++){
+                var entries = null;
+                if(j==0)
+                    entries = y1_entries;
+                else
+                    entries = y2_entries;
 					//--------original code repeated twice, for y1 and y2 axes ------ //
 							var rowStarted = false, fragments = [];
 	            for (var i = 0; i < entries.length; ++i) {
@@ -2802,8 +2803,13 @@ Licensed under the MIT license.
 	
 	            if (fragments.length == 0)
 	                continue;
-	
-	            var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join("") + '</table>';
+                
+                font_size=12;
+                if(j==0 && options.legend.left_font_size!==undefined)
+                    font_size = options.legend.left_font_size;
+                if(j==1 && options.legend.right_font_size!==undefined)
+                    font_size = options.legend.right_font_size;
+	            var table = '<table style="font-size:'+font_size+'px; color:' + options.grid.color + '">' + fragments.join("") + '</table>';
 	            if (options.legend.container != null)
 	                $(options.legend.container).html(table);
 	            else {
