@@ -1765,10 +1765,10 @@ Licensed under the MIT license.
                 };
 
 				axis.tickFormatter = function (value, axis) {
-
+                    if ($.isFunction(opts.tickScaler))
+                        value = opts.tickScaler(value);
 					var factor = Math.pow(10, axis.tickDecimals);
 					var formatted = "" + Math.round(value * factor) / factor;
-
 					// If tickDecimals was specified, ensure that we have exactly that
 					// much precision; otherwise default to the value's own precision.
 
