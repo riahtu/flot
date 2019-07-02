@@ -150,6 +150,10 @@ The plugin allso adds the following methods to the plot object:
 			if(!selection.zoomLocked)
             	updateSelection(e);
 
+            if (!selectionIsSane()){
+                r = getSelection();
+                plot.getPlaceholder().trigger("plotclicked", [ r ]);
+            }
             if (selectionIsSane() || selection.zoomLocked) //if zoom is locked, selection is always sane
                 triggerSelectedEvent();
             else {
@@ -168,7 +172,7 @@ The plugin allso adds the following methods to the plot object:
             if (!selectionIsSane()&&!force)
                 return null;
             
-            if (!selection.show) return null;
+            if (!selection.show && !force) return null;
 
             var r = {}, c1 = selection.first, c2 = selection.second;
             $.each(plot.getAxes(), function (name, axis) {
